@@ -552,7 +552,7 @@ async function generateCharacterImage(char){
     const res=await fetch('https://rpgdle-proxy.rish-mannava.workers.dev/',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({inputs:prompt,parameters:{negative_prompt:negative,num_inference_steps:28,guidance_scale:7.5,width:512,height:512}})
+      body:JSON.stringify({inputs:prompt,parameters:{negative_prompt:negative,num_inference_steps:20,guidance_scale:7,width:512,height:512}})
     });
 
     if(res.ok&&res.headers.get('content-type')?.startsWith('image')){
