@@ -525,12 +525,11 @@ function equippedItem(emoji,name,sub,rarity){return `<div class="equipped-item">
 function getRarityStars(r){return{common:'★',uncommon:'★★',rare:'★★★',epic:'★★★★',legendary:'★★★★★',mythic:'✦✦✦✦✦✦',divine:'❋❋❋❋❋❋❋'}[r]||'★';}
 function animateScore(target){const el=document.getElementById('final-score');let cur=0,step=Math.ceil(target/60);const t=setInterval(()=>{cur=Math.min(cur+step,target);el.textContent=cur.toLocaleString();if(cur>=target)clearInterval(t);},16);}
 
-// ═══════════════════════════ AI IMAGE GENERATION (Hugging Face) ═══════════════════════════
+// ═══════════════════════════ AI IMAGE GENERATION (Pollinations.AI — no key needed) ═══════════════════════════
 async function generateCharacterImage(char){
   const placeholder=document.getElementById('portrait-placeholder');
   const charImg=document.getElementById('char-img');
 
-  // Show loading state
   placeholder.innerHTML=`<div class="portrait-loading">🎨</div><div class="portrait-loading-text">Generating portrait...</div>`;
   placeholder.style.display='flex';
   charImg.style.display='none';
@@ -546,30 +545,22 @@ async function generateCharacterImage(char){
   }[char.overallRarity]||'fantasy portrait';
 
   const prompt=`fantasy RPG character portrait, ${char.race.name} ${char.class.name}, wielding ${char.weapon.name}, wearing ${char.armor.name}, ${rarityStyle}, dramatic cinematic lighting, painterly digital art style, highly detailed face, square composition, no text, no watermark, professional game concept art`;
-  const negative='blurry, low quality, text, watermark, signature, ugly, deformed, extra limbs, bad anatomy, duplicate, cropped';
+
+  // Pollinations.AI — free, no API key, generates instantly
+  const encoded=encodeURIComponent(prompt);
+  const seed=Math.floor(Math.random()*1000000);
+  const url=`https://image.pollinations.ai/prompt/${encoded}?width=512&height=512&seed=${seed}&nologo=true&enhance=true`;
 
   try{
-    const res=await fetch('https://rpgdle-proxy.rish-mannava.workers.dev/',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({inputs:prompt,parameters:{negative_prompt:negative,num_inference_steps:20,guidance_scale:7,width:512,height:512}})
-    });
-
-    if(res.ok&&res.headers.get('content-type')?.startsWith('image')){
-      const blob=await res.blob();
-      const url=URL.createObjectURL(blob);
-      charImg.src=url;
+    charImg.src=url;
+    charImg.onload=()=>{
       charImg.style.display='block';
       placeholder.style.display='none';
-    } else if(res.status===503){
-      // Model loading — retry after 20s
-      placeholder.innerHTML=`<div class="portrait-loading">⏳</div><div class="portrait-loading-text">Model warming up...<br>Retrying in 20s</div>`;
-      setTimeout(()=>generateCharacterImage(char),20000);
-    } else {
-      throw new Error('HF API error '+res.status);
-    }
+    };
+    charImg.onerror=()=>{
+      placeholder.innerHTML=`<div style="font-size:96px;line-height:1;">${char.race.emoji}</div><div style="font-size:40px;margin-top:8px;">${char.class.emoji} ${char.weapon.emoji}</div><div style="font-size:13px;color:var(--text3);margin-top:8px;">${char.race.name} ${char.class.name}</div>`;
+    };
   }catch(e){
-    // Fallback to emoji portrait
     placeholder.innerHTML=`<div style="font-size:96px;line-height:1;">${char.race.emoji}</div><div style="font-size:40px;margin-top:8px;">${char.class.emoji} ${char.weapon.emoji}</div><div style="font-size:13px;color:var(--text3);margin-top:8px;">${char.race.name} ${char.class.name}</div>`;
   }
 }
