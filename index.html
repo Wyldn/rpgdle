@@ -549,7 +549,7 @@ async function generateCharacterImage(char){
   const negative='blurry, low quality, text, watermark, signature, ugly, deformed, extra limbs, bad anatomy, duplicate, cropped';
 
   try{
-    const res=await fetch('https://rpgdle.rish-mannava.workers.dev/',{
+    const res=await fetch('https://rpgdle-proxy.rish-mannava.workers.dev/',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({inputs:prompt,parameters:{negative_prompt:negative,num_inference_steps:28,guidance_scale:7.5,width:512,height:512}})
